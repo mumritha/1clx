@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+            .container {
+            position: center;
+            width: 50%;
+            height: 50%;
+            border: 1px solid rgb(16, 16, 16);
+            align-items: center;
+            padding: 10px;
+            
+
+        }
+        body{
+                   
+                    margin-left: 30%;
+                }
+        .cartrow{
+            display: flex;
+            align-items: center;
+
+        }
+        .small-image-container{
+            display: flex;
+            align-items: center;
+                    
+        }
+        .small-image {
+            max-width: 150px;
+            max-height: 150px;
+            margin-right: 10px;
+        }
+        .quantity-input {
+            width: 50px;
+            text-align: center;}
+        .input{
+            display: flex;
+            align-items: center;
+            
+        }    
+
+            
+    </style>
+</head>
+<body>
+    <div class="container">
+    
+        <form method="POST" action="{% url 'Cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ request.user.id }}">
+            <button class="button" type="submit">cart</button>
+        </form>
+        <h1>Order Summary</h1>
+        {% for data in merged_data %}  
+        <div class="cartrow">
+        <div class="small-image-container" style="flex:2;">
+            {% if data.1.0.image %}
+                            {% if data.1.0.image.file %}
+                                <img src="{{ data.1.0.image.url }}" class="small-image" alt="{{ data.1.0.alt }}">
+                            {% else %}
+                                <p>No file available</p>
+                            {% endif %}
+                        {% else %}
+                            <p>No image available</p>
+                        {% endif %}
+        </div>
+        <div class="name-input" style="flex:1">
+           <p>{{ data.0.name }}</p> 
+            
+        </div>
+        <div class="input" style="flex:1">
+            {%if data.3.0.qty%}
+            <p>{{ data.3.0.qty }}</p> 
+            {%else%}
+            <button class="quantity-button" data-product-id="{{ data.4.0.product_id}}" onclick="decreaseQuantity(this)">-</button>
+            <input type="number" class="quantity-input" name="quantity" min="1" value="1" data-price="{{data.2}}" data-product-id="{{ pro_list}}" data-discount="{{ discount}}" data-tax="{{ tax }}" user_id="{{ products.user_id}}">
+            <button class="quantity-button" data-product-id="{{ data.4.0.product_id}}" onclick="increaseQuantity(this)">+</button>
+            {%endif%}           
+        </div>
+        <div class="txx" style="flex:1">
+           <p class="tx">{{ tax }}</p>
+        </div>
+        <div class="dis" style="flex:1">
+          <p class="dis">{{ discount }}</p>
+        </div>
+        <div class="price-label" style="flex:1;">
+           <p class="price"> {{ total }}</p>
+        </div>
+        </div>
+
+        {% endfor %}
+        
+        <div class="qty" style="flex:2;">
+            <h5>Quantity:{{ qty }}</h5>
+        </div>
+        <div class="total" style="flex:1;">
+            <h5>
+                Total:{{final}}
+            </h5>
+        </div>
+        <div id="paypal-button-container" data-product-id="{{ pro_list  }}" data-user-id="{{ user_id}}" data-discount="{{ d_list }}" data-tax="{{ t_list }}" data-qty="{{ qty }}" data-total="{{ total_list }}" data-quantity="{{quantity_list}}"></div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AVXAoR8Nx8h3tbRcH7sqn6272hFXT2-7SlOsd5Ua8VlQEdve97cMF-GTmTEzyiMLFBKcrLs2RMkY-vXL&currency=USD"></script>
+    
+    <script>
+    function getCSRFToken() {
+        const csrfTokenElement = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (csrfTokenElement) {
+            return csrfTokenElement.value;
+        }
+        return null;
+    }
+    
+    paypal.Buttons({
+        // Set up the transaction
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '0.01'
+                    }
+                }]
+            });
+        },
+        // Finalize the transaction
+        onApprove: function(data, actions) {
+// Pass the 'input' element as a parameter to the 'onApprove' function
+const input = document.getElementById('paypal-button-container');
+console.log(input);
+const product_id = input.dataset.productId;
+const user_id = input.dataset.userId;
+console.log("Product ID:", product_id);
+console.log("User ID:", user_id);
+const productIds = product_id.split(',');
+console.log("Product IDs in Order:", productIds);
+
+
+
+            
+            return actions.order.capture().then(function(details) {
+                // Show a success message to the buyer
+                alert('Transaction completed  ' + details.id);
+                console.log(details);
+                console.log(details.purchase_units[0].shipping.address);
+                
+    
+                const csrfToken = getCSRFToken();
+                const product_id = input.dataset.productId; // Get the product ID from the 'input' element
+                const user_id = input.dataset.userId;
+                const tax = input.dataset.tax;
+                const discount = input.dataset.discount;
+                const total = input.dataset.total;
+                console.log(input.dataset.quantity);
+                console.log(total);
+                console.log(discount);
+                console.log(tax);
+                console.log(product_id);
+                console.log("payment id:", details.id);
+                console.log("payer id:", details.payer.payer_id);
+                console.log("user id:",user_id);
+                  
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "payment" %}',
+                    data: {
+                        'payment_id': details.id,
+                        'payer_id': details.payer.payer_id,
+                        'city': details.purchase_units[0].shipping.address.admin_area_2,
+                        'state': details.purchase_units[0].shipping.address.admin_area_1,
+                        'country': details.purchase_units[0].shipping.address.country_code,
+                        'postal_code': details.purchase_units[0].shipping.address.postal_code,
+                        'product_id': product_id, // Use the retrieved product ID here
+                        
+                        'name': details.purchase_units[0].shipping.name.full_name,
+                    
+                       
+                        'total': details.purchase_units[0].amount.value,
+                        'ftotal':input.dataset.total,
+                        'date_time': details.update_time,
+                        'status': details.status,
+                        'address': details.purchase_units[0].shipping.address.address_line_1,
+                        
+                    },
+                    headers: {
+                        'X-CSRFToken': csrfToken // Include the CSRF token in the request headers
+                    },
+                    // Add a success function here if needed
+                    success: function(response) {
+                        console.log('Payment data sent successfully:', response);
+                    },
+                    // Add an error function here if needed
+                    error: function(xhr, textStatus, errorThrown) {
+                        console.error('Error sending payment data:', errorThrown);
+                    }
+                });
+            });
+        }
+    }).render('#paypal-button-container');
+    </script>
+    
+    
+        
+<script>
+function increaseQuantity(button) {
+  var input = button.parentElement.querySelector('.quantity-input');
+  input.stepUp();
+  updatePrice(input);
+  updateQuantityLabel(input);
+
+  final(input);
+ 
+
+}
+
+function decreaseQuantity(button) {
+  var input = button.parentElement.querySelector('.quantity-input');
+  input.stepDown();
+  updatePrice(input);
+  updateQuantityLabel(input);
+
+  final(input);
+  
+
+}
+function updatePrice(input) {
+    var priceLabel = input.parentElement.nextElementSibling.querySelector('.price-label .price');
+    if (priceLabel) {
+        var quantity = input.value;
+        var price = parseFloat(input.getAttribute('data-price'));
+        var totalPrice = quantity * price;
+        priceLabel.innerText = totalPrice.toFixed(2); // Display the total price with two decimal places
+        return totalPrice;
+    } else {
+        console.error("Price label element not found.");
+        return null;
+    }
+}
+function final(input) {
+  var totalproductlabel = document.querySelector('.total h5');
+  if (totalproductlabel) {
+    var producttotal = updatePrice(input);
+    var discount = (input.getAttribute('data-discount') / 100) * producttotal;
+    var tax = (input.getAttribute('data-tax') / 100) * producttotal;
+    var totalproduct = producttotal - discount + tax; 
+    totalproductlabel.innerText = "Total: " + totalproduct.toFixed(2); // Display the total price with two decimal places and add a label "Total:"
+    return totalproduct;
+  } else {
+    console.error('Total price element not found');
+  }
+}
+
+function updateQuantityLabel(input) {
+  var quantityLabel = document.querySelector('.qty h5');
+  if (quantityLabel) {
+    var quantity = parseInt(input.value);
+    quantityLabel.innerText = "Quantity: " + quantity;
+  } else {
+    console.error('Quantity label element not found');
+  }
+}
+
+
+</script>
+
+
+    
+</body>
+</html>

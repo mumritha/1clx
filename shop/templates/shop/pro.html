@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Product</title>
+    <style>
+        .error {
+            color: red;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>S.NO</th>
+                <th>Product Name</th>
+                <th>Visibility</th>
+                <th>Product Image</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Tax</th>
+                <th>Unit</th>
+                <th>Stock</th>
+                <th>Stock Quantity</th>
+                <th>Edit</th>
+                <th>Delete</th>
+                <th>Duplicate</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for data in merged_data %}
+          <tr>
+            <td>{{ forloop.counter }}</td> 
+            <td>{{data.0.name}}</td>
+            <td>{{data.6.0.visibility}}                 
+            </td>
+            <td>
+                {% if data.1.0.image %}
+                {% if data.1.0.image.file %}
+                    <img src="{{ data.1.0.image.url }}" height="30%" width="30%" class="img-thumbnail" alt="{{ data.1.0.alt }}">
+                {% else %}
+                    <p>No file available</p>
+                {% endif %}
+                {% else %}
+                <p>No image available</p>
+                {% endif %}
+            <td>{{data.2.0.price}}</td>
+            <td>{{data.3.0.discount}}</td>
+            <td>{{data.3.0.tax}}</td>
+            <td>{{data.4.0.units}}</td>
+            <td>{{data.7.0.stock}}</td>
+            <td>{{data.5.0.stockqty}}</td>
+            <td><a href="/edit/{{data.0.id}}">Edit</a></td>
+            <td>
+                <form method="POST" action="{% url 'delete' data.0.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+            <td>
+                <form method="POST" action="{% url 'duplicate' data.0.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Duplicate</button>
+                </form>
+            </td>
+            
+          </tr>
+          
+          {% endfor %}
+        </tbody>
+        
+    </table>
+</body>
+</html>

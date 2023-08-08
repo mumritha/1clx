@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <style>
+        .productlist .search_icon {
+            right: 10px;
+            top: 10px;
+        }
+
+
+        .productlist .range-slider {
+            margin: auto;
+            text-align: center;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .productlist .range-slider svg,
+        .productlist .range-slider input[type="range"] {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+        }
+
+        .productlist input[type="number"] {
+            border: 1px solid #fff;
+            text-align: center;
+            font-size: 10px;
+            margin-bottom: 10px;
+        }
+
+        .productlist input[type="number"]::-webkit-outer-spin-button,
+        .productlist input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        .productlist input[type="number"]:invalid,
+        .productlist input[type="number"]:out-of-range {
+            border: 2px solid #e71d1a;
+        }
+
+        .productlist input[type="range"] {
+            width: 100%;
+        }
+
+        .productlist input[type="range"]:focus {
+            outline: none;
+        }
+
+        .productlist input[type="range"]:focus::-webkit-slider-runnable-track {
+            background: #3d61bb;
+        }
+
+        .productlist input[type="range"]:focus::-ms-fill-lower {
+            background: #3d61bb;
+        }
+
+        .productlist input[type="range"]:focus::-ms-fill-upper {
+            background: #3d61bb;
+        }
+
+        .productlist input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 5px;
+            cursor: pointer;
+            background: #3d61bb;
+            border-radius: 1px;
+            box-shadow: none;
+            border: 0;
+        }
+
+        .productlist input[type="range"]::-webkit-slider-thumb {
+            z-index: 2;
+            position: relative;
+            box-shadow: 0px 0px 0px #e71d1a;
+            border: 1px solid #3d61bb;
+            height: 18px;
+            width: 18px;
+            border-radius: 25px;
+            background: #96a7d2;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px;
+        }
+
+        .productlist input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 5px;
+            cursor: pointer;
+            background: #3d61bb;
+            border-radius: 1px;
+            box-shadow: none;
+            border: 0;
+        }
+
+        .productlist input[type="range"]::-moz-range-thumb {
+            z-index: 2;
+            position: relative;
+            box-shadow: 0px 0px 0px #e71d1a;
+            border: 1px solid #3d61bb;
+            height: 18px;
+            width: 18px;
+            border-radius: 25px;
+            background: #96a7d2;
+            cursor: pointer;
+        }
+
+        .productlist input[type="range"]::-ms-track {
+            width: 100%;
+            height: 5px;
+            cursor: pointer;
+            background: transparent;
+            border-color: transparent;
+            color: transparent;
+        }
+
+        .productlist input[type="range"]::-ms-fill-lower,
+        .productlist input[type="range"]::-ms-fill-upper {
+            background: #385CB7;
+            border-radius: 1px;
+            box-shadow: none;
+            border: 0;
+        }
+
+        .productlist input[type="range"]::-ms-thumb {
+            z-index: 2;
+            position: relative;
+            box-shadow: 0px 0px 0px #e71d1a;
+            border: 1px solid #3d61bb;
+            height: 18px;
+            width: 18px;
+            border-radius: 25px;
+            background: #96a7d2;
+            cursor: pointer;
+        }
+
+        .productlist .note-editor {
+            display: flex;
+            flex-direction: column-reverse;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="productlist mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card border-0 ">
+                    <div class="card-header border-0 bg-transparent fs-4 fw-bold p-sm-3 p-0">
+                        <div class="p-3 rounded-2 shadow">
+                            New Product
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0 p-sm-3 mt-sm-0 mt-3">
+                        <form action="/pcx/products/" method="post" enctype="multipart/form-data"
+                            class="row" id="myForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="_token" value="xPoioDWKqbXZEtAnBzK6CjMtcmjIxyL1qFu8wVYF">
+                            <div class="col-lg-9">
+                                <div class="p-3 p-sm-5 rounded-3 shadow">
+                                    <p class="fw-semibold pb-0 mb-0">
+                                        Basic Information
+                                    </p>
+                                    <hr class="mt-2 p-0 w-25  mb-4">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label for="inputPassword5" class="form-label fw-semibold">
+                                                Product Name
+                                            </label>
+                                            <input type="text" name="name" id="name" placeholder="Name"
+                                                class="form-control" value="" onkeyup="makeSlug(this.value)"
+                                                autocomplete="off">
+                                            <p class="errors text-danger" id="err_name"></p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="inputPassword5" class="form-label fw-semibold">
+                                                Unit
+                                            </label>
+                                            <select name="unit_id" id="unit" class="form-control">
+                                                <option selected="" disabled="">Select Unit</option>
+                                                <option value="644291769808c7be9202e342">Qty</option>
+                                                <option value="644291769808c7be9202e343">Ltr</option>
+                                                <option value="644291769808c7be9202e344">ML</option>
+                                                <option value="644291769808c7be9202e345">KG</option>
+                                                <option value="644291769808c7be9202e346">GM</option>
+                                                <option value="644291769808c7be9202e347">Meter</option>
+                                            </select>
+                                            <p class="errors text-danger" id="err_unit_id"></p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label for="exampleInputEmail1" class="form-label fw-semibold">
+                                            URL
+                                        </label>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text bg22 main-color83 text-break text-wrap
+                                                    col-12 col-sm-4 col-md-5" id="basic-addon3">
+                                                https://example.com/Products
+                                            </span>
+                                            <input type="text" name="slug" id="slug"
+                                                class="form-control col-12 col-sm-8 col-md-7" id="basic-url"
+                                                aria-describedby="basic-addon3" value="" onblur="makeSlug(this.value)">
+                                            <p class="errors text-danger" id="err_slug"></p>
+                                        </div>
+                                        <p class="text-secondary ms-2">
+                                            unique_character
+                                        </p>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <label for="inputPassword5" class="form-label fw-semibold">
+                                            product_description
+                                        </label>
+                                        <textarea id="summernote" name="description"></textarea>
+                                        <p class="errors text-danger" id="err_description"></p>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label for="inputPassword5" class="form-label fw-semibold">
+                                            product_short_description
+                                        </label>
+                                        <input type="text" name="short_description" id="short_description"
+                                            placeholder="short description" class="form-control" value="">
+                                        <p class="errors text-danger" id="err_short_description"></p>
+                                    </div>
+                                </div>
+                                <div class="p-3 p-sm-5 rounded-3 shadow mt-4">
+                                    <p class="fw-semibold pb-0 mb-0">
+                                        images
+                                    </p>
+                                    <hr class="mt-2 p-0 w-25  mb-4">
+                                    <div class="row mt-3">
+                                        <div class="col-xl-4 col-md-12 mb-4 text-center position-relative">
+                                            <div class="bg3 text-white rounded-circle position-absolute p-2 top-0 end-0"
+                                                role="button">X</div>
+                                            <div class="shadow p-2 rounded-3">
+                                                <label for="image0">
+                                                    <!-- Empty image -->
+                                                    <img alt="product Image" id="image-preview0"
+                                                        src="{% static 'image/camera-icon.png' %}" width="150" height="150"
+                                                        role="button">
+                                                    <input type="file" name="files[0]" id="image0"
+                                                        class="form-control my-file invisible" accept="image/*"
+                                                        data-id="0">
+                                                </label>
+                                                <!-- Primary image selector -->
+                                                <div class="text-center">
+                                                    <input type="radio" name="isPrimary" id="isPrimary0" value="0"
+                                                        checked="" role="button">
+                                                    <label for="isPrimary0" class="mb-2 fw-semibold text-secondary"
+                                                        role="button">Main Picture</label>
+                                                </div>
+                                                <label for="image0" class="bg3 border-0 px-3 text-white rounded-3 py-2"
+                                                    role="button">Upload</label>
+
+                                                <p class="errors text-danger" id="err_files0"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-4 col-md-12 mb-4 text-center position-relative">
+                                            <div class="bg3 text-white rounded-circle position-absolute p-2 top-0 end-0"
+                                                role="button">X</div>
+                                            <div class="shadow p-2 rounded-3">
+                                                <label for="image1">
+                                                    <!-- Empty image -->
+                                                    <img alt="product Image" id="image-preview1"
+                                                        src="{% static 'image/camera-icon.png' %}" width="150" height="150"
+                                                        role="button">
+                                                    <input type="file" name="files[1]" id="image1"
+                                                        class="form-control my-file invisible" accept="image/*"
+                                                        data-id="1">
+                                                </label>
+                                                <!-- Primary image selector -->
+                                                <div class="text-center">
+                                                    <input type="radio" name="isPrimary" id="isPrimary1" value="1"
+                                                        checked="" role="button">
+                                                    <label for="isPrimary1" class="mb-2 fw-semibold text-secondary"
+                                                        role="button">Alt Image 1</label>
+                                                </div>
+                                                <label for="image1" class="bg3 border-0 px-3 text-white rounded-3 py-2"
+                                                    role="button">Upload</label>
+
+                                                <p class="errors text-danger" id="err_files1"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-4 col-md-12 mb-4 text-center position-relative">
+                                            <div class="bg3 text-white rounded-circle position-absolute p-2 top-0 end-0"
+                                                role="button">X</div>
+                                            <div class="shadow p-2 rounded-3">
+                                                <label for="image2">
+                                                    <!-- Empty image -->
+                                                    <img alt="product Image" id="image-preview2"
+                                                        src="{% static 'image/camera-icon.png' %}" width="150" height="150"
+                                                        role="button">
+                                                    <input type="file" name="files[2]" id="image2"
+                                                        class="form-control my-file invisible" accept="image/*"
+                                                        data-id="2">
+                                                </label>
+                                                <!-- Primary image selector -->
+                                                <div class="text-center">
+                                                    <input type="radio" name="isPrimary" id="isPrimary2" value="2"
+                                                        checked="">
+                                                    <label for="isPrimary2" class="mb-2 fw-semibold text-secondary"
+                                                        role="button">Alt Image 2</label>
+                                                </div>
+                                                <label for="image2" class="bg3 border-0 px-3 text-white rounded-3 py-2"
+                                                    role="button">Upload</label>
+
+                                                <p class="errors text-danger" id="err_files2"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 mb-4">
+                                            <label for="image_name0">Main Picture ALT Tag</label>
+                                        </div>
+                                        <div class="col-md-8 ">
+                                            <input type="text" name="image_name[]" id="image_name0" class="form-control"
+                                                value="">
+                                            <p class="errors text-danger" id="err_image_name0"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 mb-4">
+                                            <label for="image_name1">Alt Image 1 ALT Tag</label>
+                                        </div>
+                                        <div class="col-md-8 ">
+                                            <input type="text" name="image_name[]" id="image_name1" class="form-control"
+                                                value="">
+                                            <p class="errors text-danger" id="err_image_name1"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 mb-4">
+                                            <label for="image_name2">Alt Image 2 ALT Tag</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" name="image_name[]" id="image_name2" class="form-control"
+                                                value="">
+
+                                            <p class="errors text-danger" id="err_image_name2"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 mb-4">
+                                            <label for="image_name3">Alt Image 3 ALT Tag</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" name="image_name[]" id="image_name3" class="form-control"
+                                                value="">
+                                            <p class="errors text-danger" id="err_image_name3"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 mb-4">
+                                            <label for="image_name4">Alt Image 4 ALT Tag</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" name="image_name[]" id="image_name4" class="form-control"
+                                                value="">
+
+                                            <p class="errors text-danger" id="err_image_name4"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 p-sm-5 rounded-3 shadow mt-4">
+                                    <p class="fw-semibold pb-0 mb-0">
+                                        pricing
+                                    </p>
+                                    <hr class="mt-2 p-0 w-25  mb-4">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <input type="radio" name="price_type" id="fixed_price" value="0"
+                                                onchange="togglePrice()" checked="">
+                                            <label for="fixed_price">
+                                                fixed_price
+                                            </label>
+                                        </div>
+                                        <div class="col-sm-6 mt-2 mt-sm-0">
+                                            <input type="radio" name="price_type" id="custom_price" value="1"
+                                                onchange="togglePrice()">
+                                            <label for="custom_price">
+                                                custom_price
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="errors text-danger" id="err_price_type"></p>
+                                    <div id="fixed_price_div">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="price" class="fw-semibold">
+                                                    price
+                                                </label>
+                                                <input type="text" name="price" id="price" class="form-control mt-2"
+                                                    value="" onkeyup="calculatePrice()">
+
+                                                <p class="errors text-danger" id="err_price"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 p-sm-5 rounded-3 shadow mt-4">
+                                    <p class="fw-semibold pb-0 mb-0">
+                                        discount
+                                    </p>
+                                    <hr class="mt-2 p-0 w-25  mb-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="discount" class="fw-semibold">
+                                                discount_percentage
+                                            </label>
+                                            <input type="text" name="discount" class="form-control mt-2" id="discount"
+                                                value="">
+
+                                            <p class="errors text-danger" id="err_discount"></p>
+
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="discount_amount" class="fw-semibold ">
+                                                discount_amount
+                                            </label>
+                                            <input type="text" name="discount_amount" class="form-control mt-2"
+                                                id="discount_amount" readonly="" value="">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="discount_from" class="fw-semibold">
+                                                discount_time_range'
+                                            </label>
+                                            <input type="text" name="datetimes" id="discount_from"
+                                                class="form-control mt-2" value="" />
+
+                                            <p class="errors text-danger" id="err_discount_from"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-3 p-sm-5 rounded-3 shadow mt-4">
+                                    <p class="fw-semibold pb-0 mb-0">
+                                        tax
+                                    </p>
+                                    <hr class="mt-2 p-0 w-25  mb-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="tax" class="fw-semibold">
+                                                tax_percentage
+                                            </label>
+                                            <input type="text" name="tax" class="form-control mt-2" id="tax" value="">
+
+                                            <p class="errors text-danger" id="err_tax"></p>
+
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="tax_amount" class="fw-semibold">
+                                                tax_amount
+                                            </label>
+                                            <input type="text" name="tax_amount" class="form-control mt-2"
+                                                id="tax_amount" readonly="" value="">
+                                        </div>
+                                    </div>
+                                    <br>
+                                </div>
+                                <div class="p-3 p-sm-5 rounded-3 shadow mt-4">
+                                    <p class="fw-semibold pb-0 mb-0">
+                                        stock
+                                    </p>
+                                    <hr class="mt-2 p-0 w-25  mb-4">
+                                    <div class="row">
+                                        <div class="col-xl-2 col-lg-4 col-md-6 mt-lg-3 mt-0">
+                                            <input type="radio" name="stock" id="in_stock" value="0"
+                                                onchange="toggleStock()" checked="">
+                                            <label for="in_stock">
+                                                in_stock
+                                            </label>
+                                        </div>
+                                        <div class="col-xl-3 col-lg-4 col-md-6 mt-lg-3 mt-0">
+                                            <input type="radio" name="stock" id="out_of_stock" value="1"
+                                                onchange="toggleStock()">
+                                            <label for="out_of_stock">
+                                                out_of_stock
+                                            </label>
+                                        </div>
+                                        <div class="col-xl-2 col-lg-4 col-md-6 mt-lg-3 mt-0">
+                                            <input type="radio" name="stock" id="back_order" value="2"
+                                                onchange="toggleStock()">
+                                            <label for="back_order">
+                                                back_order
+                                            </label>
+                                        </div>
+                                        <div class="col-xl-2 col-lg-4 col-md-6 mt-lg-3 mt-0">
+                                            <input type="radio" name="stock" id="pre_order" value="3"
+                                                onchange="toggleStock()">
+                                            <label for="pre_order">
+                                                pre_order
+                                            </label>
+                                        </div>
+                                        <div class="col-xl-3 col-lg-4 col-md-12 mt-lg-3 mt-0 qtyElement">
+                                            <label for="quantity">
+                                                stock_quantity
+                                            </label>
+                                            <input type="text" name="count" id="quantity" class="form-control mt-2"
+                                                value="">
+                                        </div>
+                                        <p class="errors text-danger" id="err_count"></p>
+                                        <p class="errors text-danger" id="err_stock"></p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div class="p-3 rounded-3 shadow">
+                                    <label class="fs-5 fw-semibold">
+                                        visibility
+                                    </label>
+                                    <div class="row mt-3">
+                                        <div class="col-12 mt-2">
+                                            <input type="radio" name="isActive" id="published" value="0" checked="">
+                                            <label for="published">
+                                                published
+                                            </label>
+                                        </div>
+                                        <div class="col-12 mt-2">
+                                            <input type="radio" name="isActive" id="hidden" value="1">
+                                            <label for="hidden">
+                                                hidden
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <label class="fs-5 fw-semibold mt-3">
+                                        publish_date
+                                    </label>
+                                    <input type="datetime-local" name="" value=""
+                                        class="w-100 border-1 border p-1 text-secondary mt-2" />
+                                    <p class="errors text-danger" id="err_isActive"></p>
+
+                                </div>
+                                <div class="p-3 rounded-3 shadow mt-3">
+                                    <label for="category_title" class="fs-5 fw-semibold">
+                                        categories
+                                    </label>
+                                    <select name="parent_category[]" id="parent_category" multiple="" class="mt-3">
+                                        <option selected="" disabled=""></option>
+                                        <option value="643e79241ac82006e1056b56">Women</option>
+                                        <option value="643e902d1ac82006e1056b62">Watches</option>
+                                        <option value="643e78fc1ac82006e1056b53">Main Category</option>
+                                        <option value="643e79071ac82006e1056b54">Kids</option>
+                                        <option value="643e793a1ac82006e1056b58">Accessories</option>
+                                    </select>
+
+                                    <p class="errors text-danger" id="err_parent_category"></p>
+                                </div>
+                                <div class="p-3 rounded-3 shadow mt-3">
+                                    <label for="category_title" class="fs-5 fw-semibold">
+                                        tags
+                                    </label>
+                                    <textarea type="text" name="" id="" class="form-control mt-2" value="" cols="30"
+                                        rows="3">
+                                        </textarea>
+
+                                    <p class="errors text-danger" id="err_parent_category"></p>
+                                </div>
+                                <div class="p-3 rounded-3 shadow">
+                                    <label for="page_title" class="fs-5 fw-semibold">
+                                        search_engine
+                                    </label>
+                                    <p class="fs-6 text-secondary mt-3">
+                                        earch_engine_content
+                                    </p>
+                                    <label for="page_title" class="fs-5 fw-semibold">
+                                        page_title
+                                    </label>
+                                    <textarea type="text" name="page_title" id="page_title" class="form-control mt-2"
+                                        value="" cols="30" rows="3"></textarea>
+
+                                    <p class="errors text-danger" id="err_page_title"></p>
+
+                                    <label for="meta_description" class="fs-5 fw-semibold">
+                                        meta_description
+                                    </label>
+                                    <textarea name="meta_description" id="meta_description" cols="30" rows="5"
+                                        class="form-control mt-2"></textarea>
+
+                                    <p class="errors text-danger" id="err_meta_description"></p>
+
+                                </div>
+                            </div>
+                            <div class="text-center mt-5">
+                                <a href="#" class="btn btn-primary rounded-pill  px-5 mt-3">
+                                    back
+                                </a>
+                                <input type="submit" value="Submit" class="btn btn-primary  rounded-pill  px-5 mt-3"
+                                    onclick="submitFrom(true);event.preventDefault();">
+                            </div>
+                            {% if messages %}
+                            {% for display in messages %}
+                            {{ display }}
+                            {% endfor %}
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

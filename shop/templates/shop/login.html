@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product</title>
+    <style>
+        .error {
+            color: red;
+        }
+        .image-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .image-container img {
+            max-width: 200px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <form action="" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% for field in forms3 %}
+        <div>
+            {{ field.label_tag }} {{ field }} <span class="error">{{ field.errors|striptags }}</span>
+        </div>
+        {% endfor %}
+        
+        <button type="submit">Submit</button></t>
+        <a href="/register">
+           Register
+        </a>
+        
+        
+        {% if messages %}
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        {% endif %}
+    </form>
+</body>
+</html>
